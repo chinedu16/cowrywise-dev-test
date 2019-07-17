@@ -3,6 +3,7 @@ import App from './App.vue'
 import router from './router'
 import store from './store'
 import axios from 'axios'
+import { VueSpinners } from '@saeris/vue-spinners'
 
 Vue.config.productionTip = false
 
@@ -10,5 +11,6 @@ new Vue({
   router,
   store,
   axios,
+  VueSpinners,
   render: h => h(App)
 }).$mount('#app')

@@ -2,20 +2,24 @@
   <div class="about">
     <section>
       <div class="container">
+        
         <div class="header-search">
           <span class="fa fa-search"></span>
-          <div>  <input type="text" name="" id="" placeholder="Search for Photos.."></div>
+          <div>  <input type="text" name="" id="" v-model="search" v-on:keyup="searchEntry" placeholder="Search for Photos.."></div>
         </div>
         <div class="image-container">
           <ul class="grid">
-            <vcl-facebook v-if="!images"></vcl-facebook>
-            <li v-else  @click="modal(image)" class="gallery__image " v-for="image in images" :key="image">
-              <img id="myImg" :src="image" alt="Avatar" class="image">
+            <li @click="modal(image.urls.small, image.user.name)" class="gallery__image " v-for="image in images" :key="image.id">
+              <img id="myImg" :src="image.urls.small" alt="Avatar" class="image">
               <div class="text">
-                <h1>Flying Kites</h1>
+                <h1>{{image.user.name}}</h1>
                 <h3>London, Mumbai</h3>
+                <div class="loader" v-if="loader">
+                  <pulse-loader v-show="loader" class="custom-class"  :color='color' :loading='loader'></pulse-loader>
+                </div>
               </div>
             </li>
+            
           </ul>
         </div>
       </div>
@@ -29,40 +33,51 @@
   </div>
 </template>
 <script>
-import { VclFacebook } from 'vue-content-loading';
 import axios from 'axios'
+import { PulseLoader } from '@saeris/vue-spinners'
 export default {
   components: {
-    VclFacebook
+    PulseLoader
   },
   name: 'list-images',
   data: function () {
     return {
+      color: '#3daff9',
+      loader: false,
+      search: '',
       images: []
     }
   },
   methods: {
     getImage: function () {
+      this.loader = true
       const baseURI = 'https://api.unsplash.com/photos/?client_id=b9f69c845aa5a486905c09075f2ec48d4d8aec94c4630fd28e3a78ebfaf5df7d'
       axios.get(baseURI)
       .then((result) => {
         let response = result.data
         response.forEach(element => {
-          console.log(element.urls.small)
-          this.images.push(element.urls.small)
+          this.images.push(element)
+          this.loader = false
         });
       })
     },
-    modal: function (image) {
+    modal: function (image, name) {
       let modal = document.getElementById("myModal")
       let modalImg = document.getElementById("img01")
       modal.style.display = "block";
       modalImg.src = image;
     },
     close: function () {
-      var span = document.getElementsByClassName('close')[0];
       let modal = document.getElementById("myModal")
       modal.style.display = 'none'
+    },
+    searchEntry: function () {
+      let query = this.search
+      const baseURI = 'https://api.unsplash.com/search/photos/?query='+`${query}`+'&client_id=b9f69c845aa5a486905c09075f2ec48d4d8aec94c4630fd28e3a78ebfaf5df7d'
+      axios.get(baseURI)
+      .then((result) => {
+        this.images = result.data.results
+      })
     }
   },
   created () {
@@ -79,7 +94,7 @@ export default {
     background: #dde2e9;
     padding: 91px 118px;
     position: relative;
-    z-index: -999999999;
+    
     input {
       height: 57px;
       width: 100%;
@@ -89,6 +104,7 @@ export default {
       text-indent: 65px;
       
       &:focus, &:active {
+        z-index: 199999;
         border-radius: 10px;
         outline: none;
         box-shadow: 0 8px 6px -6px black;
@@ -102,7 +118,8 @@ export default {
     }
   }
   .image-container {
-    top: -50px;
+    z-index: 1;
+    top: -70px;
     display: flex;
     justify-content: center;
     position: relative;
@@ -115,7 +132,7 @@ export default {
       .gallery__image{
         background: linear-gradient(to bottom, rgba(0,0,0,0) 0%,rgba(0,0,0,0.4) 100%); /* W3C */
         cursor: pointer;
-
+        border-radius: 10px;
         img {
           &:hover{
             opacity: 0.7s;
@@ -130,11 +147,14 @@ export default {
             margin: 0px;
             font-size: 18px;
             font-weight: bold;
+            width: 50%;
+            text-transform: capitalize;
           }
           h3 {
             margin: 0px;
             font-size: 11px;
             font-weight: 500;
+            text-transform: capitalize;
           }
         }
       }
