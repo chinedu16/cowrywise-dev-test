@@ -7,8 +7,17 @@
           <span class="fa fa-search"></span>
           <div>  <input type="text" name="" id="" v-model="search" v-on:keyup="searchEntry" placeholder="Search for Photos.."></div>
         </div>
+        
         <div class="image-container">
-          <ul class="grid">
+          <div class="wrapper">
+            <div class="masonry masonry--v" >
+              <div class="masonry-brick masonry-brick--v" @click="modal(image.urls.small, image.user.name)" v-for="image in images" :key="image.id">
+                <img :src="image.urls.small" class="masonry-img" alt="Masonry Brick #1">
+              </div>
+            </div>
+          </div>
+
+          <!-- <ul class="grid">
             <li @click="modal(image.urls.small, image.user.name)" class="gallery__image " v-for="image in images" :key="image.id">
               <img id="myImg" :src="image.urls.small" alt="Avatar" class="image">
               <div class="text">
@@ -19,8 +28,7 @@
                 </div>
               </div>
             </li>
-            
-          </ul>
+          </ul> -->
         </div>
       </div>
       <!-- The Modal -->
@@ -51,7 +59,7 @@ export default {
   methods: {
     getImage: function () {
       this.loader = true
-      const baseURI = 'https://api.unsplash.com/photos/?client_id=b9f69c845aa5a486905c09075f2ec48d4d8aec94c4630fd28e3a78ebfaf5df7d'
+      const baseURI = 'https://api.unsplash.com/photos/?client_id=b9f69c845aa5a486905c09075f2ec48d4d8aec94c4630fd28e3a78ebfaf5df7d&per_page=20'
       axios.get(baseURI)
       .then((result) => {
         let response = result.data
@@ -119,108 +127,156 @@ export default {
     }
   }
   .image-container {
-    z-index: 1;
-    top: -70px;
-    display: flex;
-    justify-content: center;
-    position: relative;
-    .grid {
-      display: grid;
-      grid-gap: 30px 50px;
-      grid-template-columns: 225px 225px 225px;
-      grid-auto-flow: dense;
 
-      .gallery__image{
-        background: linear-gradient(to bottom, rgba(0,0,0,0) 0%,rgba(0,0,0,0.4) 100%); /* W3C */
-        cursor: pointer;
-        border-radius: 10px;
-        img {
-          &:hover{
-            opacity: 0.7s;
-          }
-        }
-        .text {
-          position: absolute;
-          color: #fff;
-          margin-left: 20px;
+    .wrapper {
+      margin: 2em auto;
+      max-width: 970px;
+    }
 
-          h1 {
-            margin: 0px;
-            font-size: 18px;
-            font-weight: bold;
-            width: 50%;
-            text-transform: capitalize;
-          }
-          h3 {
-            margin: 0px;
-            font-size: 11px;
-            font-weight: 500;
-            text-transform: capitalize;
-          }
-        }
+    img {
+      vertical-align: middle;
+      max-width: 100%;
+    }
+
+    .masonry {
+      display: flex;
+      width: 100%;
+    }
+
+    a {
+      color: #333;
+    }
+
+    .masonry--v {
+      flex-flow: column wrap;
+      max-height: 1080px;
+    }
+
+    .masonry--v {
+      margin-left: -8px; /* Adjustment for the gutter */
+      counter-reset: brick;
+    }
+
+    .masonry-brick {
+      overflow: hidden;
+      border-radius: 5px;
+      margin: 0 0 50px 8px;  /* Some Gutter */
+      background-color: #333;
+      color: white;
+      position: relative;
+    }
+
+    .masonry-brick:after {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      z-index: 5000;
+      transform: translate(-50%, -50%);
+      counter-increment: brick;
+      content: counter(brick);
+      transition: font-size .25s, opacity .25s ease-in-out;
+      font-weight: 700;
+      opacity: .5;
+      font-size: 1.25em;
+    }
+
+    @media only screen and (min-width: 1024px) {
+      /* Horizontal masonry bricks on desktop-sized screen */
+      .masonry-brick--h:nth-child(4n+1) {
+        width: 250px;
+      }
+      .masonry-brick--h:nth-child(4n+2) {
+        width: 325px;
+      }
+      .masonry-brick--h:nth-child(4n+3) {
+        width: 180px;
+      }
+      .masonry-brick--h:nth-child(4n+4) {
+        width: 380px;
+      }
+
+      /* Adjusting vertical masonry height on desktop-sized screen */
+      .masonry--v {
+        max-height: 2663px;
+      }
+
+      /* Vertical masonry bricks on desktop-sized screen */
+      .masonry-brick--v {
+        width: 33.33333%;
       }
     }
+
+    @media only screen and (max-width: 1023px) and (min-width: 768px) {
+      /* Horizontal masonry bricks on tabled-sized screen */
+      .masonry-brick--h:nth-child(4n+1) {
+        width: 200px;
+      }
+      .masonry-brick--h:nth-child(4n+2) {
+        width: 250px;
+      }
+      .masonry-brick--h:nth-child(4n+3) {
+        width: 120px;
+      }
+      .masonry-brick--h:nth-child(4n+4) {
+        width: 280px;
+      }
+
+      /* Adjusting vertical masonry height on tablet-sized screen */
+      .masonry--v {
+        max-height: 2000px;
+      }
+
+      /* Vertical masonry bricks on tablet-sized screen */
+      .masonry-brick--v {
+        width: 50%;
+      }
+    }
+
+    .masonry-img {
+      object-fit: cover;
+      width: 100%;
+      height: 100%;
+      filter: brightness(90%);
+    }
+  }
+
+  .modal {
+    display: none;
+    position: fixed;
+    z-index: 1; 
+    padding-top: 100px; 
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto; 
+    background-color: rgb(0,0,0);
+    background-color: rgba(0,0,0,0.9); 
+  }
+
+  .modal-content {
+    margin: auto;
+    display: block;
+    width: 80%;
+    max-width: 72%;
+    object-fit: cover;
+  }
+
+  .close {
+    position: absolute;
+    top: 15px;
+    right: 35px;
+    color: #f1f1f1;
+    font-size: 40px;
+    font-weight: bold;
+    transition: 0.3s;
+  }
+
+  .close:hover,
+  .close:focus {
+    color: #bbb;
+    text-decoration: none;
+    cursor: pointer;
   }
 }
-
-ul {
-  margin: 0;
-  padding: 0;
-}
-li {
-  list-style: none;  
-  display: flex;
-  align-items: flex-end;
-}  
-img {
-  position:relative;
-  z-index:-1;
-  border-radius: 10px;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: 0.3s;
-}
-
-.modal {
-  display: none;
-  position: fixed;
-  z-index: 1; 
-  padding-top: 100px; 
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  overflow: auto; 
-  background-color: rgb(0,0,0);
-  background-color: rgba(0,0,0,0.9); 
-}
-
-.modal-content {
-  margin: auto;
-  display: block;
-  width: 80%;
-  max-width: 72%;
-  object-fit: cover;
-}
-
-.close {
-  position: absolute;
-  top: 15px;
-  right: 35px;
-  color: #f1f1f1;
-  font-size: 40px;
-  font-weight: bold;
-  transition: 0.3s;
-}
-
-.close:hover,
-.close:focus {
-  color: #bbb;
-  text-decoration: none;
-  cursor: pointer;
-}
-
 </style>
-
-
