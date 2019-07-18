@@ -1,4 +1,4 @@
-# cowrywise-app
+# cowrywise-app Author: Chinedu Ohagwu
 
 ## Project setup
 ```
